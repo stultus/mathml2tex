@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from converter import convert_mathml2tex
+from converter import sanitize_statement
 
 class ConverterTestClass(unittest.TestCase):
 	'''Test mathml2tex'''
@@ -20,8 +20,8 @@ class ConverterTestClass(unittest.TestCase):
 		<div class=\"labelDiv container\"></div></label></div></div></div></div>'''
 		processed_equation = '''<p>Directions: Select the related number
                 from the given alternatives. </p>
-                <p>\frac{U}{S}:\frac{21}{19}::\frac{K}{R}:?</p> '''
-		self.assertEqual(convert_mathml2tex(equation), processed_equation)
+                <p></p><p>\frac{U}{S}:\frac{21}{19}::\frac{K}{R}:?</p> '''
+		self.assertEqual(sanitize_statement(equation), processed_equation)
 
 if __name__ =='__main__':
 	unittest.main()
