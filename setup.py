@@ -14,5 +14,6 @@ setup(
     install_requires=['lxml', 'beautifulsoup4', 'htmllaundry'],
     tests_require=['mock'],
     test_suite='mathml2tex.test',
+    include_package_data=True,
 )
 
