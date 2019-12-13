@@ -23,7 +23,7 @@ def convert_mathml2tex(equation):
 def sanitize_statement(statement):
     ''' Sanitize statement with MathML 
     into Tex & minimul html'''
-    soup = BeautifulSoup(statement)
+    soup = BeautifulSoup(statement, features="lxml")
     for item in soup.find_all('math'):
         new_tag = soup.new_tag('p')
         new_tag.string = convert_mathml2tex(str(item))
