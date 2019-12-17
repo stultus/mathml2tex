@@ -26,8 +26,13 @@ def sanitize_statement(statement):
     soup = BeautifulSoup(statement, features="lxml")
     for item in soup.find_all('math'):
         new_tag = soup.new_tag('p')
-        new_tag.string = convert_mathml2tex(str(item))
+        latex_string = convert_mathml2tex(str(item))
+        new_tag.string = f"\( {latex_string}\)"
         item.replace_with(new_tag)
-    return sanitize(soup).strip()
+    for x in soup.find_all():
+        if len(x.get_text(strip=True)) == 0:
+            x.extract()
+    converted_equation = " ".join(str(soup).split())
+    return sanitize(converted_equation).strip()
     
 	
