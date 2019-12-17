@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='mathml2tex',
-    version='0.1',
+    version='0.2',
     packages=['mathml2tex'],
     license='The MIT License (MIT)',
     author='Hrishikesh Bhaskaran',
