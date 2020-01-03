@@ -29,9 +29,9 @@ def sanitize_statement(statement):
         latex_string = convert_mathml2tex(str(item))
         new_tag.string = f"\( {latex_string}\)"
         item.replace_with(new_tag)
-    for x in soup.find_all():
-        if len(x.get_text(strip=True)) == 0:
-            x.extract()
+    #for x in soup.find_all():
+    #    if len(x.get_text(strip=True)) == 0:
+    #        x.extract()
     converted_equation = " ".join(str(soup).split())
     return sanitize(converted_equation).strip()
     
