@@ -1,4 +1,5 @@
 import os
+import re
 
 import nh3
 from bs4 import BeautifulSoup
@@ -28,7 +29,7 @@ def convert_mathml2tex(equation):
     xslt = etree.parse(xslt_file)
     transform = etree.XSLT(xslt)
     newdom = transform(dom)
-    latex = str(newdom).replace('$', '').strip()
+    latex = re.sub(r'^\$+|\$+$', '', str(newdom).strip())
     return latex
 
 
