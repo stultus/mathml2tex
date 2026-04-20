@@ -1,9 +1,15 @@
+from __future__ import annotations
+
+import logging
 import os
 import re
+from typing import Union
 
 import nh3
 from bs4 import BeautifulSoup, NavigableString
 from lxml import etree
+
+logger = logging.getLogger(__name__)
 
 _ALLOWED_TAGS = {
     "a", "b", "br", "code", "em", "i", "img", "li", "ol", "p", "pre", "span",
@@ -16,7 +22,11 @@ _ALLOWED_ATTRS = {
 }
 
 
-def _sanitize_html(html):
+class Mathml2TexError(Exception):
+    """Raised when MathML input cannot be converted to LaTeX."""
+
+
+def _sanitize_html(html: str) -> str:
     return nh3.clean(html, tags=_ALLOWED_TAGS, attributes=_ALLOWED_ATTRS)
 
 
@@ -35,26 +45,52 @@ _TRANSFORM = etree.XSLT(
 )
 
 
-def convert_mathml2tex(equation):
-    '''Convert MathML to LaTeX.
+def _coerce_mathml_bytes(equation: Union[str, bytes]) -> bytes:
+    if isinstance(equation, bytes):
+        return equation
+    if isinstance(equation, str):
+        return equation.encode("utf-8")
+    raise Mathml2TexError(
+        f"MathML input must be str or bytes, got {type(equation).__name__}"
+    )
+
+
+def convert_mathml2tex(equation: Union[str, bytes]) -> str:
+    """Convert a MathML string or bytes payload to a LaTeX string.
 
     ref: https://github.com/oerpub/mathconverter
-    '''
-    dom = etree.fromstring(equation, parser=_PARSER)
-    newdom = _TRANSFORM(dom)
-    latex = re.sub(r'^\$+|\$+$', '', str(newdom).strip()).strip()
-    return latex
+    """
+    payload = _coerce_mathml_bytes(equation)
+    try:
+        dom = etree.fromstring(payload, parser=_PARSER)
+    except etree.XMLSyntaxError as exc:
+        raise Mathml2TexError(f"invalid MathML: {exc}") from exc
+    try:
+        newdom = _TRANSFORM(dom)
+    except etree.XSLTApplyError as exc:
+        raise Mathml2TexError(f"XSLT transform failed: {exc}") from exc
+    return re.sub(r'^\$+|\$+$', '', str(newdom).strip()).strip()
 
 
-def sanitize_statement(statement):
-    '''Sanitize statement with MathML into TeX and minimal HTML.
+def sanitize_statement(statement: str, *, strict: bool = True) -> str:
+    """Sanitize a statement with inline MathML into TeX + minimal HTML.
 
-    Each <math> block in the input is replaced inline with its LaTeX
-    equivalent, wrapped in \\( ... \\) delimiters. The rest of the HTML
-    is run through nh3 with a safe allowlist.
-    '''
+    Each ``<math>`` block is replaced inline with its LaTeX equivalent
+    wrapped in ``\\( ... \\)`` delimiters. The rest of the HTML is
+    allowlist-sanitized with nh3.
+
+    When ``strict`` is True (the default) a failed MathML conversion
+    propagates as ``Mathml2TexError``. When False, the offending
+    ``<math>`` block is logged and left in the output untouched.
+    """
     soup = BeautifulSoup(statement, features="html.parser")
     for item in soup.find_all('math'):
-        latex = convert_mathml2tex(str(item))
+        try:
+            latex = convert_mathml2tex(str(item))
+        except Mathml2TexError:
+            if strict:
+                raise
+            logger.warning("skipping unconvertible <math> block", exc_info=True)
+            continue
         item.replace_with(NavigableString(rf"\( {latex} \)"))
     return _sanitize_html(str(soup)).strip()
