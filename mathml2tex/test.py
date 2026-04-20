@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest
-from converter import sanitize_statement
+from mathml2tex.converter import sanitize_statement
 
 class ConverterTestClass(unittest.TestCase):
 	'''Test mathml2tex'''
