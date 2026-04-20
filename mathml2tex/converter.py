@@ -1,9 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
-from lxml import etree
+
+import nh3
 from bs4 import BeautifulSoup
-from htmllaundry import sanitize
+from lxml import etree
+
+_ALLOWED_TAGS = {
+    "a", "b", "br", "code", "em", "i", "img", "li", "ol", "p", "pre", "span",
+    "strong", "sub", "sup", "table", "tbody", "td", "th", "thead", "tr", "u", "ul",
+}
+_ALLOWED_ATTRS = {
+    "a": {"href", "title", "rel"},
+    "img": {"src", "alt", "class", "style", "title", "width", "height"},
+    "*": {"class"},
+}
+
+
+def _sanitize_html(html):
+    return nh3.clean(html, tags=_ALLOWED_TAGS, attributes=_ALLOWED_ATTRS)
 
 def convert_mathml2tex(equation):
     '''Convert MathML to Latex
@@ -33,6 +48,6 @@ def sanitize_statement(statement):
     #    if len(x.get_text(strip=True)) == 0:
     #        x.extract()
     converted_equation = " ".join(str(soup).split())
-    return sanitize(converted_equation).strip()
+    return _sanitize_html(converted_equation).strip()
     
 	

@@ -11,7 +11,7 @@ setup(
     description='Convert semi html statements with MathML to semi html statements with Latex',
     long_description=open('README.md').read(),
     keywords='mathml latex mathml2latex ',
-    install_requires=['lxml', 'beautifulsoup4', 'htmllaundry'],
+    install_requires=['lxml>=4.9,<7', 'beautifulsoup4>=4.9', 'nh3>=0.2'],
     tests_require=['mock'],
     test_suite='mathml2tex.test',
     include_package_data=True,
