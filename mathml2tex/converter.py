@@ -22,7 +22,17 @@ def _sanitize_html(html):
 
 _HERE = os.path.dirname(os.path.realpath(__file__))
 _XSLT_PATH = os.path.join(_HERE, 'xsl_yarosh', 'mmltex.xsl')
-_TRANSFORM = etree.XSLT(etree.parse(_XSLT_PATH))
+
+_PARSER = etree.XMLParser(
+    resolve_entities=False,
+    no_network=True,
+    huge_tree=False,
+    load_dtd=False,
+)
+_TRANSFORM = etree.XSLT(
+    etree.parse(_XSLT_PATH),
+    access_control=etree.XSLTAccessControl.DENY_ALL,
+)
 
 
 def convert_mathml2tex(equation):
@@ -30,7 +40,7 @@ def convert_mathml2tex(equation):
 
     ref: https://github.com/oerpub/mathconverter
     '''
-    dom = etree.fromstring(equation)
+    dom = etree.fromstring(equation, parser=_PARSER)
     newdom = _TRANSFORM(dom)
     latex = re.sub(r'^\$+|\$+$', '', str(newdom).strip())
     return latex
