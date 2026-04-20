@@ -11,6 +11,8 @@ from lxml import etree
 
 logger = logging.getLogger(__name__)
 
+_MATHML_NS = "http://www.w3.org/1998/Math/MathML"
+
 _ALLOWED_TAGS = {
     "a", "b", "br", "code", "em", "i", "img", "li", "ol", "p", "pre", "span",
     "strong", "sub", "sup", "table", "tbody", "td", "th", "thead", "tr", "u", "ul",
@@ -65,6 +67,12 @@ def convert_mathml2tex(equation: Union[str, bytes]) -> str:
         dom = etree.fromstring(payload, parser=_PARSER)
     except etree.XMLSyntaxError as exc:
         raise Mathml2TexError(f"invalid MathML: {exc}") from exc
+    root_tag = etree.QName(dom.tag)
+    if root_tag.namespace != _MATHML_NS:
+        raise Mathml2TexError(
+            "root element is not in the MathML namespace "
+            f"({_MATHML_NS!r}); add xmlns=\"{_MATHML_NS}\" on <math>"
+        )
     try:
         newdom = _TRANSFORM(dom)
     except etree.XSLTApplyError as exc:
