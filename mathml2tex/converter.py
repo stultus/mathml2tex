@@ -2,7 +2,7 @@ import os
 import re
 
 import nh3
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString
 from lxml import etree
 
 _ALLOWED_TAGS = {
@@ -10,7 +10,7 @@ _ALLOWED_TAGS = {
     "strong", "sub", "sup", "table", "tbody", "td", "th", "thead", "tr", "u", "ul",
 }
 _ALLOWED_ATTRS = {
-    "a": {"href", "title", "rel"},
+    "a": {"href", "title"},
     "img": {"src", "alt", "class", "style", "title", "width", "height"},
     "*": {"class"},
 }
@@ -42,17 +42,19 @@ def convert_mathml2tex(equation):
     '''
     dom = etree.fromstring(equation, parser=_PARSER)
     newdom = _TRANSFORM(dom)
-    latex = re.sub(r'^\$+|\$+$', '', str(newdom).strip())
+    latex = re.sub(r'^\$+|\$+$', '', str(newdom).strip()).strip()
     return latex
 
 
 def sanitize_statement(statement):
-    '''Sanitize statement with MathML into TeX and minimal HTML.'''
-    soup = BeautifulSoup(statement, features="lxml")
+    '''Sanitize statement with MathML into TeX and minimal HTML.
+
+    Each <math> block in the input is replaced inline with its LaTeX
+    equivalent, wrapped in \\( ... \\) delimiters. The rest of the HTML
+    is run through nh3 with a safe allowlist.
+    '''
+    soup = BeautifulSoup(statement, features="html.parser")
     for item in soup.find_all('math'):
-        new_tag = soup.new_tag('p')
-        latex_string = convert_mathml2tex(str(item))
-        new_tag.string = rf"\( {latex_string} \)"
-        item.replace_with(new_tag)
-    converted_equation = " ".join(str(soup).split())
-    return _sanitize_html(converted_equation).strip()
+        latex = convert_mathml2tex(str(item))
+        item.replace_with(NavigableString(rf"\( {latex} \)"))
+    return _sanitize_html(str(soup)).strip()
