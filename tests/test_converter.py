@@ -136,6 +136,37 @@ class TestSanitizeStatement:
         assert sanitize_statement("") == ""
 
 
+class TestMenclose:
+    def test_top_produces_plain_overline(self):
+        mathml = (
+            b'<math xmlns="http://www.w3.org/1998/Math/MathML">'
+            b'<menclose notation="top"><mi>A</mi><mi>B</mi></menclose>'
+            b'<mo>=</mo><mn>2</mn></math>'
+        )
+        assert convert_mathml2tex(mathml) == r"\overline{AB}=2"
+
+    def test_default_notation_produces_plain_overline(self):
+        mathml = (
+            b'<math xmlns="http://www.w3.org/1998/Math/MathML">'
+            b"<menclose><mi>x</mi></menclose></math>"
+        )
+        assert convert_mathml2tex(mathml) == r"\overline{x}"
+
+    def test_longdiv_keeps_paren(self):
+        mathml = (
+            b'<math xmlns="http://www.w3.org/1998/Math/MathML">'
+            b'<menclose notation="longdiv"><mn>123</mn></menclose></math>'
+        )
+        assert r"\overline{)" in convert_mathml2tex(mathml)
+
+    def test_radical_still_works(self):
+        mathml = (
+            b'<math xmlns="http://www.w3.org/1998/Math/MathML">'
+            b'<menclose notation="radical"><mi>x</mi></menclose></math>'
+        )
+        assert convert_mathml2tex(mathml) == r"\sqrt{x}"
+
+
 class TestSanitizeHtmlHelper:
     def test_allows_p(self):
         assert _sanitize_html("<p>x</p>") == "<p>x</p>"

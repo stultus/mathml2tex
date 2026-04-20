@@ -162,8 +162,13 @@
 			<xsl:apply-templates/>
 			<xsl:text>}</xsl:text>
 		</xsl:when>
-		<xsl:otherwise>
+		<xsl:when test="@notation = 'longdiv'">
 			<xsl:text>\overline{)</xsl:text>
+			<xsl:apply-templates/>
+			<xsl:text>}</xsl:text>
+		</xsl:when>
+		<xsl:otherwise>
+			<xsl:text>\overline{</xsl:text>
 			<xsl:apply-templates/>
 			<xsl:text>}</xsl:text>
 		</xsl:otherwise>
