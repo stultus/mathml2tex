@@ -22,6 +22,9 @@ setup(
     install_requires=["lxml>=4.9,<7", "beautifulsoup4>=4.9", "nh3>=0.2"],
     package_data={"mathml2tex": ["xsl_yarosh/*.xsl", "xsl_yarosh/README*"]},
     include_package_data=True,
+    entry_points={
+        "console_scripts": ["mathml2tex=mathml2tex.__main__:main"],
+    },
     classifiers=[
         "Development Status :: 4 - Beta",
         "License :: OSI Approved :: MIT License",
