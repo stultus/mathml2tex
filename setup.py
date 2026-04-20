@@ -12,8 +12,7 @@ setup(
     long_description=open('README.md').read(),
     keywords='mathml latex mathml2latex ',
     install_requires=['lxml>=4.9,<7', 'beautifulsoup4>=4.9', 'nh3>=0.2'],
-    tests_require=['mock'],
-    test_suite='mathml2tex.test',
+    package_data={'mathml2tex': ['xsl_yarosh/*.xsl', 'xsl_yarosh/README*']},
     include_package_data=True,
 )
 
