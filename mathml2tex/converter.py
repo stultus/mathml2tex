@@ -19,16 +19,19 @@ _ALLOWED_ATTRS = {
 def _sanitize_html(html):
     return nh3.clean(html, tags=_ALLOWED_TAGS, attributes=_ALLOWED_ATTRS)
 
+
+_HERE = os.path.dirname(os.path.realpath(__file__))
+_XSLT_PATH = os.path.join(_HERE, 'xsl_yarosh', 'mmltex.xsl')
+_TRANSFORM = etree.XSLT(etree.parse(_XSLT_PATH))
+
+
 def convert_mathml2tex(equation):
-    '''Convert MathML to Latex
+    '''Convert MathML to LaTeX.
+
     ref: https://github.com/oerpub/mathconverter
     '''
-    script_base_path = os.path.dirname(os.path.realpath(__file__))
-    xslt_file = os.path.join(script_base_path, 'xsl_yarosh', 'mmltex.xsl')
     dom = etree.fromstring(equation)
-    xslt = etree.parse(xslt_file)
-    transform = etree.XSLT(xslt)
-    newdom = transform(dom)
+    newdom = _TRANSFORM(dom)
     latex = re.sub(r'^\$+|\$+$', '', str(newdom).strip())
     return latex
 
