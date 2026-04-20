@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import os
 
 import nh3
@@ -30,24 +28,17 @@ def convert_mathml2tex(equation):
     xslt = etree.parse(xslt_file)
     transform = etree.XSLT(xslt)
     newdom = transform(dom)
-    equation = str(newdom)
-    equation = equation.replace('$', '').strip()
-    return equation
+    latex = str(newdom).replace('$', '').strip()
+    return latex
 
 
 def sanitize_statement(statement):
-    ''' Sanitize statement with MathML 
-    into Tex & minimul html'''
+    '''Sanitize statement with MathML into TeX and minimal HTML.'''
     soup = BeautifulSoup(statement, features="lxml")
     for item in soup.find_all('math'):
         new_tag = soup.new_tag('p')
         latex_string = convert_mathml2tex(str(item))
-        new_tag.string = f"\( {latex_string}\)"
+        new_tag.string = rf"\( {latex_string} \)"
         item.replace_with(new_tag)
-    #for x in soup.find_all():
-    #    if len(x.get_text(strip=True)) == 0:
-    #        x.extract()
     converted_equation = " ".join(str(soup).split())
     return _sanitize_html(converted_equation).strip()
-    
-	
